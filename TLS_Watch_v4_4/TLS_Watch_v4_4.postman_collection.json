@@ -1,0 +1,1445 @@
+{
+  "info": {
+    "name": "TLS Watch v4.4 — Distributed Agent Monitoring, Groups, APIs & Webhooks",
+    "description": "Read-only certificate and history GET endpoints use X-API-Key. Admin routes for import/backup and independent webhooks require local/dashboard credentials. See api.md. Never share real credentials.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Read-only monitoring API — X-API-Key",
+      "description": "The preferred integration/API. Works remotely over HTTPS after you expose TLS Watch securely; requires an API key. GET only.",
+      "auth": {
+        "type": "apikey",
+        "apikey": [
+          {
+            "key": "key",
+            "value": "X-API-Key",
+            "type": "string"
+          },
+          {
+            "key": "value",
+            "value": "{{apiKey}}",
+            "type": "string"
+          },
+          {
+            "key": "in",
+            "value": "header",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Dashboard summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/summary",
+            "description": "Summary includes total, healthy (>90d), expiring_60, needs_attention, stale_warning and stale_critical."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "All certificates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates",
+            "description": "Get all sites, including paused and not-yet-checked sites."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expired certificates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?range=expired",
+            "description": "days_left < 0; zero is in 0-30 range."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expiring in 0–30 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?range=0-30",
+            "description": "0 <= days_left <= 30. Excludes already expired."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expiring in 31–60 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?range=31-60",
+            "description": "31 <= days_left <= 60."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expiring in 61–90 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?range=61-90",
+            "description": "61 <= days_left <= 90."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Healthy expiry >90 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?range=90%2B",
+            "description": "days_left > 90. Important: plus sign is URL encoded %2B. This is an expiration-only category."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expiring within 30 days (incl. expired)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/expiring?within=30",
+            "description": "Includes negative days_left, unlike range=0-30."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expiring within 60 days (incl. expired)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/expiring?within=60",
+            "description": "Includes 60 days or less, including expired."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Expiring within 90 days (incl. expired)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/expiring?within=90",
+            "description": "Includes 90 days or less, including expired."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Needs Attention",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/needs-attention",
+            "description": "Expiry <=30, TLS trust failure, connection failure, or stale retrieval >24h."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificate by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/{{siteId}}",
+            "description": "Details for a site ID found in All certificates."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List all groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/groups",
+            "description": "Discover group numeric IDs and counts; ALL is virtual."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get one group",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/groups/{{groupId}}",
+            "description": "Single group record and site count."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/summary?group={{groupId}}",
+            "description": "Summary counters scoped to selected group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group certificates — all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?group={{groupId}}",
+            "description": "List certificates in a selected group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group certificates — expired",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?group={{groupId}}&range=expired",
+            "description": "Expired within group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group certificates — 0 to 30 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?group={{groupId}}&range=0-30",
+            "description": "0–30 days remaining in group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group certificates — 31 to 60 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?group={{groupId}}&range=31-60",
+            "description": "31–60 days remaining in group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group certificates — 61 to 90 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?group={{groupId}}&range=61-90",
+            "description": "61–90 days remaining in group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group certificates — healthy >90 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates?group={{groupId}}&range=90%2B",
+            "description": ">90 days remaining in group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group expiring within 30 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/expiring?within=30&group={{groupId}}",
+            "description": "Includes expired in group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group expiring within 60 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/expiring?within=60&group={{groupId}}",
+            "description": "Includes expired in group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group expiring within 90 days",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/expiring?within=90&group={{groupId}}",
+            "description": "Includes expired in group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group needs attention",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/needs-attention?group={{groupId}}",
+            "description": "Check failures, untrusted certs, and <=30 days for group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group certificate by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/{{siteId}}?group={{groupId}}",
+            "description": "404 if site is not assigned to selected group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Group-scoped path example",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/groups/{{groupId}}/certificates/needs-attention",
+            "description": "Equivalent scoped /groups/{id} path."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificate history by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/certificates/{{siteId}}/history",
+            "description": "History: certificate versions and check results; no PEM data."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Certificate history within selected group",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/groups/{{groupId}}/certificates/{{siteId}}/history",
+            "description": "Only available for certificates belonging to the chosen group."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List monitoring agents (read-only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/agents",
+            "description": "Public agent status (online/offline/disabled), last seen and assigned site counts. Requires read-only X-API-Key."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Local dashboard administration — optional",
+      "description": "WARNING: these are admin routes, not read-only API routes. They are accessible only on localhost without app credentials. When APP_USERNAME/PASSWORD is configured, set adminUsername/adminPassword for Basic auth; also secure with HTTPS/proxy when remote. The API key does not authorize these.",
+      "auth": {
+        "type": "basic",
+        "basic": [
+          {
+            "key": "username",
+            "value": "{{adminUsername}}",
+            "type": "string"
+          },
+          {
+            "key": "password",
+            "value": "{{adminPassword}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "View settings and recent deliveries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/settings",
+            "description": "Dashboard administration: API key status (never the key), webhook subscriptions, recent delivery status."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"JSON response\", function () { pm.response.to.be.json; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Generate or rotate API key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/api-key",
+            "description": "DANGER: immediately revokes a prior API key. Response contains a NEW key shown ONCE. Copy to the apiKey collection variable manually. Only run intentionally.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Generated a key\", function () {pm.response.to.have.status(200); pm.expect(pm.response.json().api_key).to.match(/^tlsw_/);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revoke API key (destructive)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/settings/api-key",
+            "description": "DANGER: destroys the current remote API key. Do not invoke except to disable remote API access."
+          },
+          "response": []
+        },
+        {
+          "name": "Save webhook (disabled setup)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhook",
+            "description": "Sets URL and event selections while delivery is disabled, allowing you to copy a generated signing secret safely. Set webhookUrl first. On initial save, response contains a signing_secret shown ONCE. Changing URL or disabling cancels pending deliveries.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": false,\n  \"url\": \"{{webhookUrl}}\",\n  \"events\": [\n    \"expiration_90\",\n    \"expiration_60\",\n    \"expiration_30\",\n    \"certificate_expired\",\n    \"tls_invalid\",\n    \"check_failed\",\n    \"recovered\",\n    \"certificate_changed\",\n    \"needs_attention\",\n    \"attention_cleared\"\n  ],\n  \"allow_http\": false,\n  \"allow_private\": false,\n  \"allow_self_signed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enable webhook",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhook",
+            "description": "After configuring your HTTPS receiver and copying the signing secret, enable delivery using this saved event selection.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"url\": \"{{webhookUrl}}\",\n  \"events\": [\n    \"expiration_90\",\n    \"expiration_60\",\n    \"expiration_30\",\n    \"certificate_expired\",\n    \"tls_invalid\",\n    \"check_failed\",\n    \"recovered\",\n    \"certificate_changed\",\n    \"needs_attention\",\n    \"attention_cleared\"\n  ],\n  \"allow_http\": false,\n  \"allow_private\": false,\n  \"allow_self_signed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send test webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhook/test",
+            "description": "Queues one test delivery. Requires webhook enabled. Check recent deliveries for success/failure.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Test queued\", function () {pm.response.to.have.status(202);});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rotate webhook signing secret",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhook/rotate-secret",
+            "description": "DANGER: old signing secret invalidates immediately. Pending deliveries are cancelled. New secret shown ONCE. Copy into receiver.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List groups (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/groups",
+            "description": "List named persistent groups."
+          },
+          "response": []
+        },
+        {
+          "name": "Create group (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/groups",
+            "description": "Creates group; edit the example name and site IDs.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Example Group\", \"site_ids\": []}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rename group (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/groups/{{groupId}}",
+            "description": "Rename the numeric group.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Renamed Group\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete group (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/groups/{{groupId}}",
+            "description": "Deletes this group but NOT its monitored websites."
+          },
+          "response": []
+        },
+        {
+          "name": "Replace group members (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/groups/{{groupId}}/sites",
+            "description": "Replaces group membership; CAUTION empty array clears membership.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"site_ids\": [1]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set website groups (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sites/{{siteId}}/groups",
+            "description": "Replaces site group memberships with group IDs.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"group_ids\": [1]}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Export inventory JSON (no secrets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/export.json",
+            "description": "Download all URLs, groups and paused state (NO credentials)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export inventory CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/export-inventory.csv",
+            "description": "CSV: URL,Groups,Paused. Multi-memberships separated by semicolons."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Import inventory CSV",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/import",
+            "description": "Creates groups, merges memberships, preserves certificates and applies paused state.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"csv\",\n  \"content\": \"URL,Groups,Paused\\nhttps://example.com,Production;Internal,false\\nhttps://dev.example.net,Development,true\\n\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Import inventory JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/import",
+            "description": "Portable JSON backup import; URL/group validation and atomic changes.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"json\",\n  \"content\": \"{\\\"groups\\\": [\\\"Production\\\"], \\\"websites\\\": [{\\\"url\\\": \\\"https://example.com\\\", \\\"groups\\\": [\\\"Production\\\"], \\\"paused\\\": false}]}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Website check and certificate history (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/sites/{{siteId}}/history",
+            "description": "UI history data, including version comparisons."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download observed historical PEM (admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/sites/{{siteId}}/history/{{historyCertId}}.pem",
+            "description": "Saved leaf PEM of a selected certificate version."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create group-filtered webhook destination",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhooks",
+            "description": "New destination, signing secret shown once. Group IDs [] = ALL sites.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Production alerts\",\n  \"enabled\": true,\n  \"url\": \"{{webhookUrl}}\",\n  \"events\": [\n    \"certificate_renewed\",\n    \"certificate_issuer_changed\",\n    \"expiration_30\",\n    \"check_failed\",\n    \"monitoring_stale_critical\"\n  ],\n  \"group_ids\": [\n    1\n  ],\n  \"allow_http\": false,\n  \"allow_private\": false,\n  \"allow_self_signed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit webhook destination",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhooks/{{targetId}}",
+            "description": "Change URL, groups, event subscriptions, TLS opts or enabled state.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Production alerts\",\n  \"enabled\": true,\n  \"url\": \"{{webhookUrl}}\",\n  \"events\": [\n    \"certificate_renewed\",\n    \"expiration_30\",\n    \"check_failed\"\n  ],\n  \"group_ids\": [\n    1\n  ],\n  \"allow_http\": false,\n  \"allow_private\": false,\n  \"allow_self_signed\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send test to specific webhook destination",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhooks/{{targetId}}/test",
+            "description": "Queues test event for this destination.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Rotate specific webhook signing secret",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings/webhooks/{{targetId}}/rotate-secret",
+            "description": "Rotates only one destination secret; cancel pending sends.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete specific webhook destination",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/settings/webhooks/{{targetId}}",
+            "description": "Destructive: deletes this destination; does not affect websites."
+          },
+          "response": []
+        },
+        {
+          "name": "List agents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/agents",
+            "description": "Admin dashboard credentials required."
+          },
+          "response": []
+        },
+        {
+          "name": "Create agent and pairing code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/agents",
+            "description": "Creates an agent and returns 15-minute single-use enrollment code.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Branch Office\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Regenerate agent pairing code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/agents/{{agentId}}/pair",
+            "description": "Get new one-time code; do not log or share.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Disable agent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/agents/{{agentId}}",
+            "description": "Change enabled status; no checks while disabled.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"enabled\": false}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign website to an agent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sites/{{siteId}}/agent",
+            "description": "Set agent_id to an integer or null for primary.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"agent_id\": 1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Move website to primary",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sites/{{siteId}}/agent",
+            "description": "Return this website to primary-local certificate checks.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"agent_id\": null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete agent",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/agents/{{agentId}}",
+            "description": "Reassigns sites to primary. Not reversible."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080",
+      "type": "string",
+      "description": "Change to your HTTPS reverse proxy URL for secure remote monitoring, e.g. https://tls-watch.example.net"
+    },
+    {
+      "key": "apiKey",
+      "value": "",
+      "type": "string",
+      "description": "Paste the one-time read-only API key from the dashboard; do not publish/export with real secrets."
+    },
+    {
+      "key": "siteId",
+      "value": "1",
+      "type": "string",
+      "description": "Site numeric ID from GET /api/v1/certificates"
+    },
+    {
+      "key": "groupId",
+      "value": "1",
+      "type": "string",
+      "description": "Stable numeric group ID returned by GET /api/v1/groups; choose a real group, not ALL."
+    },
+    {
+      "key": "adminUsername",
+      "value": "",
+      "type": "string",
+      "description": "Optional APP_USERNAME; leave blank for localhost if unset"
+    },
+    {
+      "key": "adminPassword",
+      "value": "",
+      "type": "string",
+      "description": "Optional APP_PASSWORD; leave blank for localhost if unset"
+    },
+    {
+      "key": "webhookUrl",
+      "value": "https://hooks.example.com/tls-watch",
+      "type": "string",
+      "description": "Replace example with your actual HTTPS webhook receiver URL"
+    },
+    {
+      "key": "targetId",
+      "value": "1",
+      "type": "string",
+      "description": "ID of additional webhook destination"
+    },
+    {
+      "key": "historyCertId",
+      "value": "1",
+      "type": "string",
+      "description": "ID returned under certificate history versions"
+    },
+    {
+      "key": "agentId",
+      "value": "1"
+    }
+  ]
+}

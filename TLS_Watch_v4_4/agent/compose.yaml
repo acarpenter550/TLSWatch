@@ -1,0 +1,15 @@
+services:
+  tls-watch-agent:
+    build: .
+    container_name: tls-watch-agent
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8899:8899"
+    volumes:
+      - tlswatch-agent-data:/data
+    environment:
+      POLL_SECONDS: "15"
+      AGENT_WORKERS: "3"
+      TLS_TIMEOUT_SECONDS: "8"
+volumes:
+  tlswatch-agent-data:
